@@ -407,8 +407,8 @@ function laneToMd(lane: Lane) {
   return lines.join('\n');
 }
 
-function archiveToMd(archive: Item[]) {
-  if (archive.length) {
+function archiveToMd(archive: Map<string, Item[]>) {
+  if (archive.size) {
     const lines: string[] = [archiveString, '', `## ${t('Archive')}`, ''];
 
     archive.forEach((item) => {

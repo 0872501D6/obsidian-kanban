@@ -202,6 +202,7 @@ export function getBoardModifiers(stateManager: StateManager): BoardModifiers {
       stateManager.setState(async (boardData) => {
         const lane = getEntityFromPath(boardData, path);
         const items = lane.children;
+        const title = lane.id
 
         stateManager.app.workspace.trigger(
           'kanban:lane-cards-archived',
