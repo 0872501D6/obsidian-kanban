@@ -410,10 +410,26 @@ function laneToMd(lane: Lane) {
 function archiveToMd(archive: Item[]) {
   if (archive.length) {
     const lines: string[] = [archiveString, '', `## ${t('Archive')}`, ''];
+    const archiveMap = new Map<string, Item[]>();
 
     archive.forEach((item) => {
-      lines.push(itemToMd(item));
+      const title = item.data.title;
+      console.log(`TitleX: ${title}`);
+      const tokens = title.split('***');
+      const part1 = tokens[0];
+      console.log(`part1: ${part1}`)
+      if (!archiveMap.has(part1)) {
+        archiveMap.set(part1, [item]);
+      } else {
+        archiveMap.get(part1).push(item);
+      }
     });
+
+    for (const [key, items] of archiveMap) {
+      console.log(`Key: ${key}`)
+      lines.push(`### ${key}`)
+      items.forEach(item => lines.push(itemToMd(item)));
+    }
 
     return lines.join('\n');
   }
@@ -435,10 +451,16 @@ export function boardToMd(board: Board) {
     '',
   ].join('\n');
 
+  const archives = archiveToMd(board.data.archive);
+
+  console.log(`Archives ${archives}`)
+
+  const settings = settingsToCodeblock(board.data.settings);
+
   return (
     frontmatter +
     lanes +
-    archiveToMd(board.data.archive) +
-    settingsToCodeblock(board.data.settings)
+    archives +
+    settings
   );
 }

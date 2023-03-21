@@ -57,6 +57,14 @@ export function getBoardModifiers(stateManager: StateManager): BoardModifiers {
     return stateManager.updateItemContent(item, titleRaw);
   };
 
+  const appendArchiveLaneTitle = (laneTitle:string, item: Item) => {
+    const newTitle = [laneTitle, '***', item.data.titleRaw];
+
+    const titleRaw = newTitle.join(' ');
+
+    return stateManager.updateItemContent(item, titleRaw);
+  };
+
   return {
     appendItems: (path: Path, items: Item[]) => {
       items.forEach((item) =>
@@ -174,6 +182,7 @@ export function getBoardModifiers(stateManager: StateManager): BoardModifiers {
       stateManager.setState(async (boardData) => {
         const lane = getEntityFromPath(boardData, path);
         const items = lane.children;
+        const laneTitle = lane.data.title;
 
         stateManager.app.workspace.trigger(
           'kanban:lane-archived',
@@ -187,7 +196,7 @@ export function getBoardModifiers(stateManager: StateManager): BoardModifiers {
               archive: {
                 $unshift: stateManager.getSetting('archive-with-date')
                   ? await Promise.all(items.map(appendArchiveDate))
-                  : items,
+                    : await Promise.all(items.map(item => appendArchiveLaneTitle(laneTitle, item))),
               },
             },
           });
@@ -202,6 +211,7 @@ export function getBoardModifiers(stateManager: StateManager): BoardModifiers {
       stateManager.setState(async (boardData) => {
         const lane = getEntityFromPath(boardData, path);
         const items = lane.children;
+        const laneTitle = lane.data.titleRaw;
 
         stateManager.app.workspace.trigger(
           'kanban:lane-cards-archived',
@@ -210,6 +220,7 @@ export function getBoardModifiers(stateManager: StateManager): BoardModifiers {
         );
 
         try {
+          console.log('kanban:lane-cards-archived');
           return update(
             updateEntity(boardData, path, {
               children: {
@@ -221,7 +232,7 @@ export function getBoardModifiers(stateManager: StateManager): BoardModifiers {
                 archive: {
                   $unshift: stateManager.getSetting('archive-with-date')
                     ? await Promise.all(items.map(appendArchiveDate))
-                    : items,
+                    : items.map(item => appendArchiveLaneTitle(laneTitle, item)),
                 },
               },
             }
